@@ -1,68 +1,137 @@
 "use client";
-import Image from "next/image";
-import { useState } from "react";
 
-const categories = {
-  Electronics: ["Laptops", "Mobiles", "Headphones"],
-  Clothing: ["T-Shirts", "Jeans", "Jackets"],
-  Accessories: ["Watches", "Bags", "Shoes"],
-};
+import { useState } from "react";
+import Image from "next/image";
+import {
+  Laptop,
+  Smartphone,
+  Headphones,
+  Shirt,
+  Watch,
+  ShoppingBag,
+  ChevronDown,
+} from "lucide-react";
+
+/* ---------------- DATA ---------------- */
+
+const categories = [
+  {
+    name: "Electronics",
+    icon: <Laptop size={18} />,
+    items: ["Laptop", "Mobile", "Headphones"],
+  },
+  {
+    name: "Clothing",
+    icon: <Shirt size={18} />,
+    items: ["T-Shirt", "Jacket"],
+  },
+  {
+    name: "Accessories",
+    icon: <Watch size={18} />,
+    items: ["Watch", "Bag"],
+  },
+];
+
+const products = [
+  { id: 1, name: "MacBook Pro", category: "Laptop" },
+  { id: 2, name: "iPhone 15", category: "Mobile" },
+  { id: 3, name: "Sony Headphones", category: "Headphones" },
+  { id: 4, name: "Leather Jacket", category: "Jacket" },
+  { id: 5, name: "Casual T-Shirt", category: "T-Shirt" },
+  { id: 6, name: "Smart Watch", category: "Watch" },
+  { id: 7, name: "Travel Bag", category: "Bag" },
+];
+
+/* ---------------- PAGE ---------------- */
 
 export default function Home() {
-  const [selectedItem, setSelectedItem] = useState("Select category");
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const filteredProducts = selected
+    ? products.filter((p) => p.category === selected)
+    : products;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col gap-10 py-32 px-16 bg-white dark:bg-black">
+    <div className="min-h-screen bg-zinc-50 p-10 dark:bg-black">
+      <div className="mx-auto max-w-5xl space-y-10">
 
-        {/* Logo */}
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-
-        {/* Heading */}
-        <h1 className="text-3xl font-semibold text-black dark:text-zinc-50">
-          Categorized Dropdown Filter
+        {/* Header */}
+        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-white">
+          Product Store
         </h1>
 
-        {/* 🔽 Dropdown Bar */}
-        <div className="relative w-full max-w-sm">
-          <select
-            value={selectedItem}
-            onChange={(e) => setSelectedItem(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-left text-zinc-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-black dark:border-zinc-700 dark:bg-black dark:text-zinc-200"
+        {/* 🔽 FILTER BAR */}
+        <div className="relative w-72">
+          <button
+            onClick={() => setOpen(!open)}
+            className="flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <option disabled>Select category</option>
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+              {selected ?? "All Categories"}
+            </span>
+            <ChevronDown size={18} />
+          </button>
 
-            {Object.entries(categories).map(([category, items]) => (
-              <optgroup
-                key={category}
-                label={category}
-                className="font-semibold text-zinc-900 dark:text-zinc-100"
+          {open && (
+            <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+              {categories.map((cat) => (
+                <div key={cat.name} className="mb-2">
+                  <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                    {cat.icon}
+                    {cat.name}
+                  </div>
+
+                  {cat.items.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => {
+                        setSelected(item);
+                        setOpen(false);
+                      }}
+                      className="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              ))}
+
+              <button
+                onClick={() => {
+                  setSelected(null);
+                  setOpen(false);
+                }}
+                className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
-                {items.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+                Clear Filter
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Selected Result */}
-        {selectedItem !== "Select category" && (
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Selected: <span className="font-medium">{selectedItem}</span>
-          </p>
-        )}
+        {/* 🛍 PRODUCT GRID */}
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <div className="flex h-24 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                <ShoppingBag size={32} />
+              </div>
+              <h3 className="mt-3 font-medium text-zinc-900 dark:text-white">
+                {product.name}
+              </h3>
+              <p className="text-sm text-zinc-500">{product.category}</p>
+            </div>
+          ))}
+        </div>
 
-      </main>
+      </div>
     </div>
   );
 }
+
+
+
